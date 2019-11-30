@@ -1,0 +1,113 @@
+#include <LiquidCrystal.h>
+#include <SPI.h>
+#include <MFRC522.h>
+MFRC522 mfrc522(10, 9);
+LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+int X;
+int Y;
+float TIME = 0;
+float FREQUENCY = 0;
+float WATER = 0;
+float TOTAL = 0;
+float LS = 0;
+const int input = A0;
+int relay=8;
+
+void setup()
+{
+pinMode(relay,OUTPUT);
+pinMode(A1,OUTPUT);
+pinMode(A3,OUTPUT);
+
+
+Serial.begin(9600);
+SPI.begin();
+mfrc522.PCD_Init();
+lcd.begin(16, 2);
+lcd.clear();
+lcd.setCursor(0,0);
+lcd.print("IIITD H2 B1");
+lcd.setCursor(0,1);
+lcd.print("HANG KEY TO START");
+delay(2000);
+pinMode(input,INPUT);
+}
+void loop()
+{
+if ( ! mfrc522.PICC_IsNewCardPresent()){
+return;
+}
+//we can read it's value
+if ( ! mfrc522.PICC_ReadCardSerial()) {
+return;
+}
+
+String content= "";
+for (byte i = 0; i < mfrc522.uid.size; i++) {
+
+content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+content.concat(String(mfrc522.uid.uidByte[i], HEX));
+}
+content.toUpperCase();
+content = content.substring(1);
+if(content == "8A 51 CF 83"){
+
+  
+
+if (TOTAL>2.5)
+
+{digitalWrite(A3,HIGH);
+digitalWrite(A1,LOW);
+digitalWrite(relay,HIGH);
+delay(1000);
+digitalWrite(relay,LOW);
+delay(1000);
+
+}
+else
+
+{ digitalWrite(A1,HIGH);
+  digitalWrite(A3,LOW);
+  
+  digitalWrite(relay,LOW);
+}
+  
+X = pulseIn(input, HIGH);
+Y = pulseIn(input, LOW);
+TIME = X + Y;
+FREQUENCY = 1000000/TIME;
+WATER = FREQUENCY/7.5;
+LS = WATER/60;
+if(FREQUENCY >= 0)
+{
+if(isinf(FREQUENCY))
+{
+Serial.println(TOTAL);  
+lcd.clear();
+lcd.setCursor(0,0);
+lcd.print("RATE. :0.00");
+lcd.setCursor(0,1);
+lcd.print("TOTAL:");
+lcd.print( TOTAL);
+lcd.print(" L");
+}
+else
+{
+TOTAL = TOTAL + LS;
+Serial.println(TOTAL);
+lcd.clear();
+lcd.setCursor(0,0);
+lcd.print("RATE: ");
+lcd.print(WATER);
+lcd.print(" L/M");
+lcd.setCursor(0,1);
+lcd.print("TOTAL:");
+lcd.print( TOTAL);
+lcd.print(" L");
+}
+}
+delay(1000);
+}
+
+
+}
