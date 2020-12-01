@@ -1,6 +1,4 @@
-# AQUAMON_T16_PIS_MAJOR_PROJECT
-AQUAMON PIS MAJOR PROJECT.
-
+AQUAMON
 
 
 In most colleges, it is often seen that in boys hostel, a lot of water is wasted in the bathrooms.
